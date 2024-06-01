@@ -9,25 +9,22 @@ import pickle
 import warnings
 warnings.filterwarnings('ignore')
 
-from sklearn.preprocessing import StandardScaler,LabelEncoder,OrdinalEncoder
+from sklearn.preprocessing import StandardScaler,OrdinalEncoder
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import ExtraTreesRegressor
-from sklearn.tree import DecisionTreeRegressor
-from xgboost import XGBRegressor
-from sklearn.metrics import mean_absolute_error,mean_squared_error,accuracy_score,r2_score
+from sklearn.metrics import mean_squared_error,r2_score
 
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
-from xgboost import XGBClassifier
+from sklearn.metrics import confusion_matrix,accuracy_score
 
 
 st.set_page_config(page_title= "Copper Modelling",
                    page_icon= 'random',
                    layout= "wide",)
 
-st.markdown("<h1 style='text-align: center; color: blue;'>WELCOME TO INDUSTRIAL COPPER MODELLING</h1>",unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: purple;'>WELCOME TO INDUSTRIAL COPPER MODELLING</h1>",unsafe_allow_html=True)
 
-selected = option_menu(None, ["PRICE PREDICTION","STATUS PREDICTION","CONCLUSION"],
+selected = option_menu(None, ["PRICE PREDICTION","STATUS PREDICTION"],
             icons=['cash-coin','trophy',"check-circle"],orientation='horizontal',default_index=0)
 
 
@@ -75,33 +72,15 @@ if selected=='PRICE PREDICTION':
                 st.write('')
                 if st.button('PREDICT PRICE'):
                     data = []
-                    with open('country.pkl', 'rb') as file:
-                        encode_country = pickle.load(file)
                     with open('status.pkl', 'rb') as file:
                         encode_status = pickle.load(file)
                     with open('item type.pkl', 'rb') as file:
                         encode_item = pickle.load(file)
                     with open('scaling.pkl', 'rb') as file:
                         scaled_data = pickle.load(file)
-
                     with open('ExtraTreeRegressor.pkl', 'rb') as f:
                         model = pickle.load(f)
-
-                    encode=LabelEncoder()
-                    encode_country=encode.fit(country_list)   
-
-                    transformed_country = encode_country.transform(country_list)
-                    encoded_ct = None
-                    for i, j in zip(country_list, transformed_country):
-                        if country == i:
-                            encoded_ct = j
-                            break
-                    else:
-                        st.error("Country not found.")
-                        exit()
-
-                    encode=LabelEncoder()
-                    encode_status=encode.fit(status_list)    
+  
 
                     transformed_status = encode_status.transform(status_list)
                     encode_st = None
@@ -114,7 +93,7 @@ if selected=='PRICE PREDICTION':
                         exit()
 
 
-                    encode=LabelEncoder()
+                    encode=OrdinalEncoder()
                     encode_item=encode.fit(item_list)
 
                     transformed_item = encode_item.transform(item_list)
@@ -137,7 +116,7 @@ if selected=='PRICE PREDICTION':
                     data.append(quantity)
                     data.append(thickness)
                     data.append(width)
-                    data.append(encoded_ct)
+                    data.append(country)
                     data.append(encode_st)
                     data.append(encode_it)
                     data.append(application)
@@ -196,8 +175,6 @@ if selected=='STATUS PREDICTION':
                 st.write('')
                 if st.button('PREDICT STATUS'):
                     data_cls = []
-                    with open('country.pkl', 'rb') as file:
-                        encode_country_cls = pickle.load(file)
                     with open('item type.pkl', 'rb') as file:
                         encode_item_cls = pickle.load(file)
                     with open('scaling_classify.pkl', 'rb') as file:
@@ -205,20 +182,7 @@ if selected=='STATUS PREDICTION':
                     with open('RandomForestClassification.pkl', 'rb') as file:
                         trained_model_cls = pickle.load(file)
 
-                    encode=LabelEncoder()
-                    encode_country_cls=encode.fit(country_list_cls)    
-
-                    transformed_country_cls = encode_country_cls.transform(country_list_cls)
-                    encoded_ct_cls = None
-                    for i, j in zip(country_list_cls, transformed_country_cls):
-                        if country_cls == i:
-                            encoded_ct_cls = j
-                            break
-                    else:
-                        st.error("Country not found.")
-                        exit()
-
-                    encode=LabelEncoder()
+                    encode=OrdinalEncoder()
                     encode_item_cls=encode.fit(item_list_cls)      
 
                     transformed_item_cls = encode_item_cls.transform(item_list_cls)
@@ -239,7 +203,7 @@ if selected=='STATUS PREDICTION':
                     data_cls.append(thickness_cls)
                     data_cls.append(width_cls)
                     data_cls.append(selling_price_cls)
-                    data_cls.append(encoded_ct_cls)
+                    data_cls.append(country_cls)
                     data_cls.append(encode_it_cls)
                     data_cls.append(application_cls)
                     data_cls.append(product_cls)
@@ -256,8 +220,4 @@ if selected=='STATUS PREDICTION':
                         st.error(f'**Predicted Status : :blue[LOST]**')
             
     except:
-        st.error("Please enter values in empty cells")  
-
-
-if selected == 'CONCLUSION': 
-    st.markdown("## :violet[My Conclusion]")
+        st.error("Please enter values in empty cells")
